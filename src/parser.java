@@ -16,8 +16,8 @@ public class parser {
 	public static HashMap<Integer, HashMap<Integer, Integer> > mapDocMot; // recense les mots dans un doc
 	public static HashMap<Integer, LinkedList<Integer> > mapMotDoc; // recense les documents dans lesquels apparait un mot
 	
-	public static int limiteLignes = 2000;
-	public static int nbTopics = 50;
+	public static int limiteLignes = 5000;
+	public static int nbTopics = 20;
 	
 	public static String cheminAbsolu = "/user/6/rattanaa/3A/Traitement/PLSA/";
 	public static String fileName = cheminAbsolu + "wiki.10k.massih.txt";
@@ -169,7 +169,7 @@ public class parser {
             		}
             	}
             	
-            	//on MAJ les tableaux	
+            	//on MAJ tabTermeTopic
             	for ( int topic = 0; topic < nbTopics ; topic++ ){
 	                	double denominateurTabTermeTopic = 0;
 	                	
@@ -182,7 +182,6 @@ public class parser {
 	                				denominateurTabTermeTopic += occurence*proba;
 	                		}
 	                	}
-	                	//On MAJ tabTermeTopic
 	                	for ( int mot = 1 ; mot <= nombreMots ; mot++ ){
 	                		double numerateur = 0;
 	                		for ( int doc : mapMotDoc.get(mot) ){
