@@ -11,17 +11,19 @@ import java.util.Scanner;
 
 public class parser {
 	public static HashMap<String, Integer> dictionnaire;
-	public static HashMap<String, Integer> indexation;
+	public static HashMap<String, Integer> indexation;// a un mot associe l'index
+	public static HashMap<Integer, String> indexationBis;// a un index associe le mot
 	public static HashMap<Integer, HashMap<Integer, Integer> > mapDocMot; // recense les mots dans un doc
 	public static HashMap<Integer, LinkedList<Integer> > mapMotDoc; // recense les documents dans lesquels apparait un mot
 	
-	public static int limiteLignes = 1000;
-	public static int nbTopics = 20;
+	public static int limiteLignes = 2000;
+	public static int nbTopics = 50;
 	
 	public static String cheminAbsolu = "/user/6/rattanaa/3A/Traitement/PLSA/";
 	public static String fileName = cheminAbsolu + "wiki.10k.massih.txt";
 	public static String writenFile = cheminAbsolu + "dictionnaire_"+ limiteLignes +".txt";
 	public static String IndexFile = cheminAbsolu + "indexation_"+ limiteLignes +".txt";
+	public static String topicsFile = cheminAbsolu + "topic_" + limiteLignes + "_" + nbTopics + ".txt";
 
 	
 	public static void main(String [] args){
@@ -36,6 +38,7 @@ public class parser {
 			
 			dictionnaire = new HashMap<>();
 			indexation = new HashMap<>();
+			indexationBis = new HashMap<>();
 			int compteurLigne = 0;
             Scanner scanner = new Scanner(inputFile);
             PrintWriter writer = new PrintWriter(outputIndex);
@@ -58,6 +61,7 @@ public class parser {
                 	} else {
                 		nombreMots++;
                 		indexation.put(mot, nombreMots);
+                		indexationBis.put(nombreMots, mot);
                 	}
             		dictionnaire.put(mot, value);      	
                 	
@@ -151,7 +155,7 @@ public class parser {
             	//On commence par stocker les P(z|d;t) dans une hashmap
             	// La clé sera sous la forme : doc-terme-topic
             	HashMap<String, Double> probaTopicTermDoc = new HashMap<>();
-            	for ( int doc = 1; doc <= 1000; doc++ ) {
+            	for ( int doc = 1; doc <= limiteLignes; doc++ ) {
             		for ( int mot : mapDocMot.get(doc).keySet() ){
             			double denominateur = 0;
             			for ( int topic = 0; topic < nbTopics; topic++){
@@ -217,14 +221,16 @@ public class parser {
 
             	}
             	//Les deux tableaux sont MAJ
-
+                	System.out.println("Fin itération " + k);
             }
             //On est sorti de la boucle while/for
             //On va maintenant chercher la proba max pour chaque topic
             System.out.println("On va chercher les mots pour chaque topic");
             int[][] tabWordTopic = new int[5][nbTopics];
             double[] tabProba = new double[5];
-            int[] tabIndex = new int[5];
+            int[] tabMots = new int[5];
+            double probaMin;
+            int indexMin;
             for ( int word = 0 ; word < 5 ; word++){
             	for ( int topic = 0; topic < nbTopics; topic++){
             		tabWordTopic[word][topic] = 0;
@@ -233,16 +239,44 @@ public class parser {
             
             for ( int topic = 0 ; topic < nbTopics ; topic++){
             	for ( int i = 0; i < 5; i++){
-            		tabIndex[i] = 0;
+            		tabMots[i] = 0;
             		tabProba[i] = 0;
             	}
-            	
-            	
-            	
+            	probaMin = 0;
+            	indexMin = 0;
+            	 for ( int word = 0 ; word < nombreMots ; word++ ){
+            		 if ( tabTermeTopic[word][topic] > probaMin ){
+            			 tabMots[indexMin] = word;
+            			 tabProba[indexMin] = tabTermeTopic[word][topic];
+            			 //MAJ du minimum
+            			 indexMin = 0;
+            			 probaMin = tabProba[indexMin];
+            			 for ( int i = 1; i < 5 ; i++ ){
+            				 if ( tabProba[i] < probaMin ){
+            					 indexMin = i;
+            					 probaMin = tabProba[i];
+            				 }
+            			 }
+            		 }
+            	 }
+            	 
+            	 for ( int i = 0; i < 5 ; i++){
+            		 tabWordTopic[i][topic] = tabMots[i];
+            	 }
+            		
             }
 
-            
-            
+            //on écrit le resultat en sortie
+            writer = new PrintWriter(topicsFile);
+            for ( int topic = 0 ; topic < nbTopics ; topic++ ){
+            	writer.print("Topic " + topic + " : ");
+            	for ( int word = 0 ; word < 5 ; word++ ){
+            		writer.print(indexationBis.get(tabWordTopic[word][topic]) + " ");
+            	}
+            	writer.print("\n");
+            }
+            writer.close();
+            System.out.println("fin");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
