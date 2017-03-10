@@ -4,13 +4,16 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.nio.MappedByteBuffer;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
 public class parser {
 	public static HashMap<String, Integer> dictionnaire;
 	public static HashMap<String, Integer> indexation;
-	public static HashMap<Integer, HashMap<Integer, Integer> > mapDocMot;
+	public static HashMap<Integer, HashMap<Integer, Integer> > mapDocMot; // recense les mots dans un doc
+	public static HashMap<Integer, LinkedList<Integer> > mapMotDoc; // recense les documents dans lesquels apparait un mot
 	
 	public static int limiteLignes = 1000;
 	public static int nbTopics = 20;
@@ -100,9 +103,11 @@ public class parser {
             
             //Créer hashmap recensant les mots pour chaque doc
             mapDocMot = new HashMap<>();
+            mapMotDoc = new HashMap<>();
             int numeroDoc = 0;
             scanner = new Scanner(outputIndex);
             while ( scanner.hasNextLine() ){
+            	// remplissage mapDocMot
             	ligne = scanner.nextLine();
             	numeroDoc++;
             	HashMap<Integer, Integer> mapDoc = new HashMap<>();
@@ -110,11 +115,19 @@ public class parser {
             	for ( int i = 0 ; i < mots.length ; i++ ){
             		String[] valeur = mots[i].split(":"); 
             		mapDoc.put(Integer.parseInt(valeur[0]), Integer.parseInt(valeur[1]));
+            		
+            		if ( !mapMotDoc.containsKey(valeur[0]) ){
+            			LinkedList<Integer> docs = new LinkedList<>();
+            			docs.add(numeroDoc);
+            			mapMotDoc.put(Integer.parseInt(valeur[0]), docs);
+            		} else {
+            			mapMotDoc.get(Integer.parseInt(valeur[0])).add(numeroDoc);
+            		}
             	}
 
             	mapDocMot.put(numeroDoc, mapDoc);
             }
-            System.out.println("Tableau Doc Mots créé OK avec " + numeroDoc + " doc; testé OK");
+            System.out.println("MApMotDoc et MapDocMot créés OK avec " + numeroDoc + " doc; testé OK");
             
             //Initialisation de la matrice termes-topics
             double[][] tabTermeTopic = new double[nombreMots][nbTopics];
@@ -152,8 +165,6 @@ public class parser {
             		}
             	}
             	
-            	System.out.println("Tableau des P(z|d;t) créé à l'itération " + k);
-            	
             	//on MAJ les tableaux	
             	for ( int topic = 0; topic < nbTopics ; topic++ ){
 	                	double denominateurTabTermeTopic = 0;
@@ -170,19 +181,16 @@ public class parser {
 	                	//On MAJ tabTermeTopic
 	                	for ( int mot = 1 ; mot <= nombreMots ; mot++ ){
 	                		double numerateur = 0;
-	                		for ( int doc : mapDocMot.keySet() ){
-	                			if ( mapDocMot.get(doc).containsKey(mot) ){
+	                		for ( int doc : mapMotDoc.get(mot) ){
 	                				int occurence = mapDocMot.get(doc).get(mot);
 	                				String key = doc + "-"  + mot + "-" + topic;
 	                				double proba = probaTopicTermDoc.get(key);
 	                				numerateur += occurence*proba;
-	                			}
 	                		}
 	                		tabTermeTopic[mot -1 ][ topic] = numerateur/denominateurTabTermeTopic;
 	                	}
             	}
-                	
-                	System.out.println("MAJ tabTermeTopic OK a l'iteration :" + k);
+
             		//On MAJ tabDocTopic
                 	for ( int doc = 1 ; doc <= limiteLignes ; doc++ ){
                     	double denominateurTabDocTopic = 0;
@@ -209,14 +217,29 @@ public class parser {
 
             	}
             	//Les deux tableaux sont MAJ
-            	System.out.println("MAj tabDocTopic Ok a l'iteration :" + k);
 
             }
             //On est sorti de la boucle while/for
             //On va maintenant chercher la proba max pour chaque topic
             System.out.println("On va chercher les mots pour chaque topic");
+            int[][] tabWordTopic = new int[5][nbTopics];
+            double[] tabProba = new double[5];
+            int[] tabIndex = new int[5];
+            for ( int word = 0 ; word < 5 ; word++){
+            	for ( int topic = 0; topic < nbTopics; topic++){
+            		tabWordTopic[word][topic] = 0;
+            	}
+            }
             
-            
+            for ( int topic = 0 ; topic < nbTopics ; topic++){
+            	for ( int i = 0; i < 5; i++){
+            		tabIndex[i] = 0;
+            		tabProba[i] = 0;
+            	}
+            	
+            	
+            	
+            }
 
             
             
