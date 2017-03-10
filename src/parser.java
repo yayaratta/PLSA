@@ -156,65 +156,60 @@ public class parser {
             	
             	//on MAJ les tableaux	
             	for ( int topic = 0; topic < nbTopics ; topic++ ){
-                	double denominateurTabTermeTopic = 0;
-                	System.out.println("topic numero : " + topic);
+	                	double denominateurTabTermeTopic = 0;
+	                	
+	                	//On calcule la valeur de denominateurTabTermeTopic
+	                	for ( int doc = 1; doc <= limiteLignes ; doc++ ){
+	                		for ( int mot : mapDocMot.get(doc).keySet()){
+	                				int occurence =  mapDocMot.get(doc).get(mot);
+	                				String key = doc + "-"  + mot + "-" + topic;
+	                				double proba = probaTopicTermDoc.get(key);
+	                				denominateurTabTermeTopic += occurence*proba;
+	                		}
+	                	}
+	                	//On MAJ tabTermeTopic
+	                	for ( int mot = 1 ; mot <= nombreMots ; mot++ ){
+	                		double numerateur = 0;
+	                		for ( int doc : mapDocMot.keySet() ){
+	                			if ( mapDocMot.get(doc).containsKey(mot) ){
+	                				int occurence = mapDocMot.get(doc).get(mot);
+	                				String key = doc + "-"  + mot + "-" + topic;
+	                				double proba = probaTopicTermDoc.get(key);
+	                				numerateur += occurence*proba;
+	                			}
+	                		}
+	                		tabTermeTopic[mot -1 ][ topic] = numerateur/denominateurTabTermeTopic;
+	                	}
+            	}
                 	
-                	//On calcule la valeur de denominateurTabTermeTopic
-                	for ( int doc = 1; doc <= limiteLignes ; doc++ ){
-                		for ( int mot = 1; mot <= nombreMots ; mot ++){
-                			if ( mapDocMot.get(doc).containsKey(mot) ){
-                				int occurence =  mapDocMot.get(doc).get(mot);
-                				String key = doc + "-"  + mot + "-" + topic;
-                				double proba = probaTopicTermDoc.get(key);
-                				denominateurTabTermeTopic += occurence*proba;
-                			}
-                		}
-                	}
-                	
-                	//On MAJ tabTermeTopic
-                	for ( int mot = 1 ; mot <= nombreMots ; mot++ ){
-                		double numerateur = 0;
-                		for ( int doc : mapDocMot.keySet() ){
-                			if ( mapDocMot.get(doc).containsKey(mot) ){
-                				int occurence = mapDocMot.get(doc).get(mot);
-                				String key = doc + "-"  + mot + "-" + topic;
-                				double proba = probaTopicTermDoc.get(key);
-                				numerateur += occurence*proba;
-                			}
-                		}
-                		tabTermeTopic[mot -1 ][ topic] = numerateur/denominateurTabTermeTopic;
-                	}
- 
+                	System.out.println("MAJ tabTermeTopic OK a l'iteration :" + k);
             		//On MAJ tabDocTopic
                 	for ( int doc = 1 ; doc <= limiteLignes ; doc++ ){
-                		
-                		//On calcul la valeur de denominateurTabDocTopic
                     	double denominateurTabDocTopic = 0;
-                    	for ( int topicBis = 0 ; topicBis < nbTopics ; topicBis++ ){
-                    		for ( int mot = 1 ; mot <= nombreMots ; mot++ ){
-                    			if ( mapDocMot.get(doc).containsKey(mot) ){
-                    				int occurence =  mapDocMot.get(doc).get(mot);
-                    				String key = doc + "-"  + mot + "-" + topicBis;
-                    				double proba = probaTopicTermDoc.get(key);
-                    				denominateurTabTermeTopic += occurence*proba;
-                    			}
-                    		}
-                    	}
-                		
-                		double numerateur = 0;
-                		for ( int mot = 1 ; mot <= nombreMots ; mot++ ){
-                			if ( mapDocMot.get(doc).containsKey(mot) ){
-                				int occurence = mapDocMot.get(doc).get(mot);
+                		//On calcul la valeur de denominateurTabDocTopic
+            			for ( int topic = 0 ; topic < nbTopics ; topic++ ){
+            				for ( int mot : mapDocMot.get(doc).keySet() ){
+            					int occurence =  mapDocMot.get(doc).get(mot);
                 				String key = doc + "-"  + mot + "-" + topic;
                 				double proba = probaTopicTermDoc.get(key);
-                				numerateur += occurence*proba;
-                			}
-                		}
-                		tabDocTopic[topic][doc-1] = numerateur/denominateurTabDocTopic;
+                				denominateurTabDocTopic += occurence*proba;
+            				}
+            			}
+
+                		for ( int topic = 0; topic < nbTopics ; topic++){	
+	                		double numerateur = 0;
+	                		for ( int mot :  mapDocMot.get(doc).keySet() ){
+	                				int occurence = mapDocMot.get(doc).get(mot);
+	                				String key = doc + "-"  + mot + "-" + topic;
+	                				double proba = probaTopicTermDoc.get(key);
+	                				numerateur += occurence*proba;	                			
+	                		}
+	                		tabDocTopic[topic][doc-1] = numerateur/denominateurTabDocTopic;
                 	}
+
             	}
             	//Les deux tableaux sont MAJ
-            	System.out.println("les tableaux ont été MAJ a l'itération :" + k);
+            	System.out.println("MAj tabDocTopic Ok a l'iteration :" + k);
 
             }
             //On est sorti de la boucle while/for
