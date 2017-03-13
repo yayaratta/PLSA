@@ -16,8 +16,8 @@ public class parser {
 	public static HashMap<Integer, HashMap<Integer, Integer> > mapDocMot; // recense les mots dans un doc
 	public static HashMap<Integer, LinkedList<Integer> > mapMotDoc; // recense les documents dans lesquels apparait un mot
 	
-	public static int limiteLignes = 5000;
-	public static int nbTopics = 20;
+	public static int limiteLignes = 3000;
+	public static int nbTopics = 50;
 	
 	public static String cheminAbsolu = "/user/6/rattanaa/3A/Traitement/PLSA/";
 	public static String fileName = cheminAbsolu + "wiki.10k.massih.txt";
@@ -169,6 +169,7 @@ public class parser {
             		}
             	}
             	
+            	System.out.println("P(z|d;t) OK");
             	//on MAJ tabTermeTopic
             	for ( int topic = 0; topic < nbTopics ; topic++ ){
 	                	double denominateurTabTermeTopic = 0;
@@ -192,8 +193,12 @@ public class parser {
 	                		}
 	                		tabTermeTopic[mot -1 ][ topic] = numerateur/denominateurTabTermeTopic;
 	                	}
+	                	if ( k == 24 ){
+	                		System.out.println("proba also pour le topic " + k + " = " + tabTermeTopic[indexation.get("also")][topic]);
+	                	}
             	}
-
+            	
+            	System.out.println("tabTermeTopic OK");
             		//On MAJ tabDocTopic
                 	for ( int doc = 1 ; doc <= limiteLignes ; doc++ ){
                     	double denominateurTabDocTopic = 0;
@@ -250,7 +255,7 @@ public class parser {
             			 //MAJ du minimum
             			 indexMin = 0;
             			 probaMin = tabProba[indexMin];
-            			 for ( int i = 1; i < 5 ; i++ ){
+            			 for ( int i = 0 ; i < 5 ; i++ ){
             				 if ( tabProba[i] < probaMin ){
             					 indexMin = i;
             					 probaMin = tabProba[i];
@@ -260,7 +265,7 @@ public class parser {
             	 }
             	 
             	 for ( int i = 0; i < 5 ; i++){
-            		 tabWordTopic[i][topic] = tabMots[i];
+            		 tabWordTopic[i][topic] = tabMots[i]+1;
             	 }
             		
             }
